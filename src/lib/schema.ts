@@ -1,15 +1,22 @@
-import { pgTable, serial, varchar, integer, timestamp, text } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, integer, timestamp, text} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { on } from "events";
+
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  identifier: varchar("identifier", { length: 100 }).notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
+  username: varchar("username", { length: 256 }).notNull().unique(),
+  passwordHash: varchar("password_hash", { length: 512 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const vault = pgTable("vault", {
+export const groups = pgTable("groups", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
-  site: varchar("site", { length: 100 }).notNull(),
-  encryptedPassword: text("encrypted_password").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+  name: varchar("name", { length: 256 }).notNull(),
+  createdBy: integer("created_by").notNull().references(() => users.id, {onDelete: 'cascade'}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+export const passwords = pgTable("passwords", {
+  
+})
