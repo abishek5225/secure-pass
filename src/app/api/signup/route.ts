@@ -1,24 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 
-export async function post(req:Request) {
-    const {identifier, password} = await req.json()
 
-    const existing = await db.query.users.findFirst({
-        where:(u, {eq})=> eq(u.identifier, identifier),
-    })
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { username, password } = body;
 
-    if(existing){
-        return NextResponse.json({error: "User already exists"}, {status: 400})
+    if (!username || !password) {
+      return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
     }
-    const hashed = await bcrypt.hash(password, 10)
 
-    await db.insert(users).values({
-        identifier,
-        passwordHash: hashed,
-    })
+    // Check if username already exists
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
 
-    return NextResponse.json({success:true})
+    if (existingUser.length > 0) {
+      return NextResponse.json({ error: "Username already taken" }, { status: 409 });
+    }
+
+    // Hash the password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Insert user into database
+    const insertedUser = await db.insert(users).values({
+      username,
+      passwordHash,
+    }).returning();
+
+    return NextResponse.json({ message: "User created successfully", user: insertedUser[0] }, { status: 201 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
