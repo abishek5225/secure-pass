@@ -18,10 +18,7 @@ export default function PasswordTable() {
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b text-gray-600">
-            <th className="p-2">Website</th>
-            <th className="p-2">Username</th>
-            <th className="p-2">Password</th>
-            <th className="p-2">Actions</th>
+            <th className="p-2">Vault</th>
           </tr>
         </thead>
         <tbody>
