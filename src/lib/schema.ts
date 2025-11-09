@@ -1,5 +1,7 @@
 import { pgTable, serial, varchar, integer, timestamp, text } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
+// USERS TABLE
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 256 }).notNull().unique(),
@@ -26,12 +28,23 @@ export const groupMembers = pgTable("group_members", {
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
 });
 
+//passwords table
 export const passwords = pgTable("passwords", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  groupId: integer("group_id").references(() => groups.id, { onDelete: "cascade" }),
-  service: varchar("service", { length: 256 }).notNull(),
-  username: varchar("username", { length: 256 }).notNull(),
-  password: text("password").notNull(),
+  ownerId: integer("owner_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+
+  //group id if shared
+  groupId: integer("group_id")
+    .references(() => groups.id, { onDelete: "set null" }),
+
+  title: varchar("title", { length: 100 }).notNull(),
+  username: varchar("username", { length: 100 }),
+  encryptedPassword: text("encrypted_password").notNull(),
+  note: text("note"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
