@@ -43,8 +43,21 @@ export const passwords = pgTable("passwords", {
   username: varchar("username", { length: 100 }),
   encryptedPassword: text("encrypted_password").notNull(),
   note: text("note"),
+  
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// passwords_keys table 
+export const passwordKeys = pgTable("password_keys", {
+  id: serial("id").primaryKey(),
+  passwordId: integer("password_id")
+    .notNull()
+    .references(() => passwords.id, { onDelete: "cascade" }),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  wrappedKey: text("wrapped_key").notNull(), // base64 of RSA-wrapped AES key
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
