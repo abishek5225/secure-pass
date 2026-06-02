@@ -1,5 +1,3 @@
-import { form } from "framer-motion/client";
-
 // src/lib/cryptoClient.ts
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
