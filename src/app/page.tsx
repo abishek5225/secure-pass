@@ -7,30 +7,30 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-900 to-black text-white">
       {/* Navbar */}
-      <header className="flex justify-between items-center px-8 py-6">
-        <h1 className="text-2xl font-bold">SecurePass</h1>
-        <nav className="space-x-6">
-          <Link href="#features" className="hover:text-blue-400">Features</Link>
-          <Link href="/auth" className="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-500">Get Started</Link>
+      <header className="flex justify-between items-center px-4 sm:px-8 py-4 sm:py-6">
+        <h1 className="text-xl sm:text-2xl font-bold">SecurePass</h1>
+        <nav className="flex items-center gap-3 sm:gap-6">
+          <Link href="#features" className="text-sm sm:text-base hover:text-blue-400 hidden sm:inline">Features</Link>
+          <Link href="/auth" className="bg-blue-600 px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base rounded-lg hover:bg-blue-500">Get Started</Link>
         </nav>
       </header>
 
       {/* Hero Section */}
-      <main className="flex flex-col items-center text-center mt-20 px-6">
+      <main className="flex flex-col items-center text-center mt-12 sm:mt-20 px-4 sm:px-6">
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-5xl font-bold mb-4"
+          className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 leading-tight"
         >
           Secure Your Passwords with <span className="text-blue-500">SecurePass</span>
         </motion.h2>
-        <p className="text-gray-300 max-w-2xl mb-8">
+        <p className="text-gray-300 max-w-2xl mb-8 text-sm sm:text-base px-2">
           Manage all your passwords in one place with end-to-end encryption.
           Simple, secure, and open-source — because your privacy matters.
         </p>
         <Link href="/auth">
-          <button className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-lg font-medium">
+          <button className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-base sm:text-lg font-medium">
             Get Started
           </button>
         </Link>
