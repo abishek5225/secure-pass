@@ -1,8 +1,5 @@
-// src/lib/cryptoClient.ts
-const textEncoder = new TextEncoder();
-const textDecoder = new TextDecoder();
+const isBrowser = typeof window !== "undefined" && typeof crypto !== "undefined";
 
-/* ---------- small base64 helpers ---------- */
 export function bufToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let binary = "";
@@ -18,7 +15,12 @@ export function base64ToBuf(b64: string): ArrayBuffer {
 }
 
 /* ---------- RSA key pair generation & export/import ---------- */
+function requireBrowser() {
+  if (!isBrowser) throw new Error("Web Crypto API is only available in browser");
+}
+
 export async function generateRSAKeyPair(): Promise<CryptoKeyPair> {
+  requireBrowser();
   return crypto.subtle.generateKey(
     {
       name: "RSA-OAEP",
@@ -32,6 +34,7 @@ export async function generateRSAKeyPair(): Promise<CryptoKeyPair> {
 }
 
 export async function exportPublicKeyBase64(pub: CryptoKey): Promise<string> {
+  requireBrowser();
   const spki = await crypto.subtle.exportKey("spki", pub);
   return bufToBase64(spki);
 }
@@ -40,10 +43,12 @@ export async function exportPrivateKeyBase64(priv: CryptoKey): Promise<string> {
   return bufToBase64(pkcs8);
 }
 export async function importPrivateKeyFromBase64(pkcs8B64: string): Promise<CryptoKey> {
+  requireBrowser();
   const pkcs8 = base64ToBuf(pkcs8B64);
   return crypto.subtle.importKey("pkcs8", pkcs8, { name: "RSA-OAEP", hash: "SHA-256" }, true, ["decrypt"]);
 }
 export async function importPublicKeyFromBase64(spkiB64: string): Promise<CryptoKey> {
+  requireBrowser();
   const spki = base64ToBuf(spkiB64);
   return crypto.subtle.importKey("spki", spki, { name: "RSA-OAEP", hash: "SHA-256" }, true, ["encrypt"]);
 }
@@ -53,10 +58,8 @@ export async function deriveKeyFromPassword(
   salt: Uint8Array,
   iterations = 150_000
 ): Promise<CryptoKey> {
+  requireBrowser();
   const encoder = new TextEncoder();
-
-  
-  const safeSalt = new Uint8Array(salt); 
 
   const baseKey = await crypto.subtle.importKey(
     "raw",
@@ -69,7 +72,7 @@ export async function deriveKeyFromPassword(
   const key = await crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt: safeSalt, 
+      salt,
       iterations,
       hash: "SHA-256",
     },
@@ -82,10 +85,9 @@ export async function deriveKeyFromPassword(
   return key;
 }
 
-
-
 /* ---------- encrypt/decrypt bytes with password-derived key ---------- */
 export async function encryptPrivateKeyForStorage(privatePkcs8Base64: string, password: string) {
+  requireBrowser();
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const derived = await deriveKeyFromPassword(password, salt);
@@ -98,11 +100,12 @@ export async function encryptPrivateKeyForStorage(privatePkcs8Base64: string, pa
 }
 
 export async function decryptPrivateKeyFromStorage(container: { ciphertext: string; iv: string; salt: string }, password: string) {
+  requireBrowser();
   const salt = new Uint8Array(base64ToBuf(container.salt));
   const iv = new Uint8Array(base64ToBuf(container.iv));
   const derived = await deriveKeyFromPassword(password, salt);
   const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, derived, base64ToBuf(container.ciphertext));
-  return bufToBase64(plainBuf); // base64 pkcs8
+  return bufToBase64(plainBuf);
 }
 
 /* ---------- Local storage helpers (IndexedDB) ---------- */
