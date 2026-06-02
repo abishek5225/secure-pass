@@ -1,34 +1,85 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { showToast } from "./Toast";
 
 interface PasswordItem {
   id: number;
   title: string;
   username: string;
   encryptedPassword: string;
+  note: string | null;
   createdAt: string;
 }
 
 export default function PasswordTable() {
-  // Dummy data 
-  const [passwords] = useState<PasswordItem[]>([
-    {
-      id: 1,
-      title: "Gmail",
-      username: "user@gmail.com",
-      encryptedPassword: "••••••••••••••••",
-      createdAt: "2025-11-08",
-    },
-    {
-      id: 2,
-      title: "GitHub",
-      username: "coder123",
-      encryptedPassword: "••••••••••••••••",
-      createdAt: "2025-11-08",
-    },
-  ]);
+  const [passwords, setPasswords] = useState<PasswordItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchPasswords = async () => {
+    try {
+      const res = await fetch("/api/passwords");
+      if (res.ok) {
+        const data = await res.json();
+        setPasswords(data.passwords || []);
+      }
+    } catch {
+      showToast("Failed to load passwords", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPasswords();
+  }, []);
+
+  const handleDelete = async (id: number) => {
+    try {
+      const res = await fetch("/api/passwords", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (res.ok) {
+        setPasswords((prev) => prev.filter((p) => p.id !== id));
+        showToast("Password deleted", "success");
+      }
+    } catch {
+      showToast("Failed to delete password", "error");
+    }
+  };
+
+  const handleCopy = async (item: PasswordItem) => {
+    try {
+      await navigator.clipboard.writeText(item.encryptedPassword);
+      showToast("Password copied", "success");
+    } catch {
+      showToast("Failed to copy", "error");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-12 text-gray-400">
+        <div className="animate-pulse">Loading passwords...</div>
+      </div>
+    );
+  }
+
+  if (passwords.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-center py-16 text-gray-500 border border-dashed border-gray-700 rounded-xl"
+      >
+        <p className="text-lg mb-2">No passwords yet</p>
+        <p className="text-sm">Click "+ Add Password" to get started</p>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -58,12 +109,23 @@ export default function PasswordTable() {
             >
               <td className="px-6 py-3">{item.title}</td>
               <td className="px-6 py-3 text-gray-300">{item.username}</td>
-              <td className="px-6 py-3 font-mono">{item.encryptedPassword}</td>
-              <td className="px-6 py-3 text-gray-400">{item.createdAt}</td>
+              <td className="px-6 py-3 font-mono">••••••••••••••••</td>
+              <td className="px-6 py-3 text-gray-400">
+                {new Date(item.createdAt).toLocaleDateString()}
+              </td>
               <td className="px-6 py-3 text-center">
-                <button className="text-blue-500 hover:text-blue-400 mr-3">View</button>
-                <button className="text-yellow-400 hover:text-yellow-300 mr-3">Edit</button>
-                <button className="text-red-500 hover:text-red-400">Delete</button>
+                <button
+                  onClick={() => handleCopy(item)}
+                  className="text-blue-500 hover:text-blue-400 mr-3"
+                >
+                  Copy
+                </button>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="text-red-500 hover:text-red-400"
+                >
+                  Delete
+                </button>
               </td>
             </motion.tr>
           ))}
