@@ -1,20 +1,23 @@
 {
-  "name": "secure-lock",
-  "version": "0.1.0",
+  "name": "secure-pass",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start"
+    "build": "next build",
+    "start": "next start",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:android": "tauri android init && tauri android build"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.1.0",
-    "bcrypt": "^6.0.0",
+    "@fortawesome/fontawesome-free": "^6.7.2",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.3",
-    "drizzle-kit": "^0.31.5",
     "drizzle-orm": "^0.44.6",
     "framer-motion": "^12.23.24",
+    "jose": "^6.0.10",
     "next": "15.5.5",
     "pg": "^8.16.3",
     "react": "19.1.0",
@@ -22,11 +25,12 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/bcrypt": "^6.0.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/pg": "^8.15.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
