@@ -30,9 +30,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files (keep .env.example)
+.env
 .env.local
+.env.*.local
+.env.development
+.env.production
 
 # vercel
 .vercel
@@ -41,5 +44,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-#env
-.env
+# Tauri
+/src-tauri/target/
+/src-tauri/gen/
+/src-tauri/android/
+/src-tauri/ios/
+*.apk
+*.aab
+*.ipa
